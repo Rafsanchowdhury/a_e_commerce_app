@@ -1,6 +1,7 @@
-import 'package:a_e_commerce_app/screens/auth-ui/sign-up-screen.dart';
+import 'package:a_e_commerce_app/screens/auth-ui/splash-screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 
 import 'firebase_options.dart';
@@ -19,12 +20,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const SignUpSccreen(), // Corrected here
+      home: const SplashScreen(),
+      builder: EasyLoading.init(),
     );
   }
 }
