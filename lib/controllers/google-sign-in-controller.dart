@@ -1,5 +1,6 @@
 // ignore_for_file: file_names, unused_local_variable, non_constant_identifier_names, unused_field, unused_import, avoid_print
 
+import 'package:a_e_commerce_app/controllers/get-device-token-controller.dart';
 import 'package:a_e_commerce_app/models/user-model.dart';
 import 'package:a_e_commerce_app/screens/user-panel/main-screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -14,6 +15,8 @@ class GoogleSignInController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   Future<void> SignInWithGoogle() async {
+    final GetDeviceTokenController getDeviceTokenController =
+        Get.put(GetDeviceTokenController());
     try {
       final GoogleSignInAccount? googleSignInAccount =
           await googleSignIn.signIn();
@@ -38,7 +41,7 @@ class GoogleSignInController extends GetxController {
             email: user.email.toString(),
             phone: user.phoneNumber.toString(),
             userImg: user.photoURL.toString(),
-            userDeviceToken: '',
+            userDeviceToken: getDeviceTokenController.deviceToken.toString(),
             country: '',
             userAddress: '',
             street: '',
