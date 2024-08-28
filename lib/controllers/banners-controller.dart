@@ -22,6 +22,7 @@ class bannerController extends GetxController {
         bannerUrls.value = bannersSnapshot.docs
             .map((doc) => doc['imageUrl'] as String)
             .toList();
+        print("valuesss: $bannerUrls");
       }
     } catch (e) {
       print("error: $e");

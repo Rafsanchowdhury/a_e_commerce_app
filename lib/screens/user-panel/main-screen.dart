@@ -2,6 +2,7 @@
 // ignore_for_file: prefer_const_constructors, file_names, duplicate_ignore, prefer_const_literals_to_create_immutables, unused_local_variable, unused_import, avoid_unnecessary_containers
 
 import 'package:a_e_commerce_app/widgets/banner-widget.dart';
+import 'package:a_e_commerce_app/widgets/heading-widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -32,8 +33,22 @@ class MainScreen extends StatelessWidget {
               SizedBox(
                 height: Get.height / 90.0,
               ),
-              //banner
+              //banners
               BannerWidget(),
+
+              //heading
+              HeadingWidget(
+                headingTitle: "Categories",
+                headingSubTitle: "According to your budget",
+                onTap: () {},
+                buttonText: "See More >",
+              ),
+              HeadingWidget(
+                headingTitle: "Flash Sale",
+                headingSubTitle: "According to your budget",
+                onTap: () {},
+                buttonText: "See More >",
+              ),
             ],
           ),
         ),
