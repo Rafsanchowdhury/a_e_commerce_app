@@ -1,35 +1,36 @@
-// ignore_for_file: prefer_const_constructors, avoid_unnecessary_containers, sized_box_for_whitespace, must_be_immutable, file_names, unused_local_variable, unused_import
+// ignore_for_file: file_names, prefer_const_constructors, avoid_unnecessary_containers, sized_box_for_whitespace, unused_import
 
-import 'package:a_e_commerce_app/models/product-model.dart';
-import 'package:a_e_commerce_app/utils/app-constant.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_card/image_card.dart';
+import '../../models/categories-model.dart';
+import '../../models/product-model.dart';
+import '../../utils/app-constant.dart';
+import 'single-category-products-screen.dart';
 
-class AllSingleCategoryProductScreen extends StatefulWidget {
-  String categoryId;
-  AllSingleCategoryProductScreen({super.key, required this.categoryId});
+class AllFlashSaleProductScreen extends StatefulWidget {
+  const AllFlashSaleProductScreen({super.key});
 
   @override
-  State<AllSingleCategoryProductScreen> createState() =>
-      _AllCategoriesScreenState();
+  State<AllFlashSaleProductScreen> createState() =>
+      _AllFlashSaleProductScreenState();
 }
 
-class _AllCategoriesScreenState extends State<AllSingleCategoryProductScreen> {
+class _AllFlashSaleProductScreenState extends State<AllFlashSaleProductScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppConstant.appMainColor,
-        title: Text('products'),
+        title: Text("All Flash Sale Products"),
       ),
       body: FutureBuilder(
         future: FirebaseFirestore.instance
             .collection('products')
-            .where('categoryId', isEqualTo: widget.categoryId)
+            .where('isSale', isEqualTo: true)
             .get(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) {
@@ -49,7 +50,7 @@ class _AllCategoriesScreenState extends State<AllSingleCategoryProductScreen> {
 
           if (snapshot.data!.docs.isEmpty) {
             return Center(
-              child: Text("No category found!"),
+              child: Text("No products found!"),
             );
           }
 
@@ -90,21 +91,27 @@ class _AllCategoriesScreenState extends State<AllSingleCategoryProductScreen> {
 
                 return Row(
                   children: [
-                    Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Container(
-                        child: FillImageCard(
-                          borderRadius: 20.0,
-                          width: Get.width / 2.3,
-                          heightImage: Get.height / 10,
-                          imageProvider: CachedNetworkImageProvider(
-                            productModel.productImages[0],
-                          ),
-                          title: Center(
-                            child: Text(
-                              productModel.productName,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(fontSize: 12.0),
+                    GestureDetector(
+                      // onTap: () => Get.to(() => AllSingleCategoryProductScreen(
+                      //       categoryId: categoriesModel.categoryId,
+                      //     )),
+                      child: Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Container(
+                          child: FillImageCard(
+                            borderRadius: 20.0,
+                            width: Get.width / 2.3,
+                            heightImage: Get.height / 10,
+                            imageProvider: CachedNetworkImageProvider(
+                              productModel.productImages[0],
+                            ),
+                            title: Center(
+                              child: Text(
+                                productModel.productName,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                style: TextStyle(fontSize: 12.0),
+                              ),
                             ),
                           ),
                         ),
@@ -115,6 +122,7 @@ class _AllCategoriesScreenState extends State<AllSingleCategoryProductScreen> {
               },
             );
           }
+
           return Container();
         },
       ),
