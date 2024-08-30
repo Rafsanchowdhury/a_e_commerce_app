@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../utils/app-constant.dart';
+import '../../widgets/all-products-widget.dart';
 import '../../widgets/category-widget.dart';
 import '../../widgets/custom-drawer-widget.dart';
 import '../../widgets/flash-sale-widget.dart';
@@ -58,6 +59,14 @@ class MainScreen extends StatelessWidget {
                 buttonText: "See More >",
               ),
               FlashSaleWidget(),
+
+              HeadingWidget(
+                headingTitle: "All Products",
+                headingSubTitle: "According to your budget",
+                onTap: () {},
+                buttonText: "See More >",
+              ),
+              AllProductsWidget(),
             ],
           ),
         ),
