@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, avoid_unnecessary_containers, sized_box_for_whitespace
+// ignore_for_file: prefer_const_constructors, avoid_unnecessary_containers, sized_box_for_whitespace, empty_statements, unused_label
 
 import 'package:a_e_commerce_app/screens/user-panel/single-category-products-screen.dart';
 import 'package:a_e_commerce_app/utils/app-constant.dart';
@@ -23,8 +23,14 @@ class _AllCategoriesScreenState extends State<AllCategoriesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(
+          color: AppConstant.appTextColor,
+        ),
         backgroundColor: AppConstant.appMainColor,
-        title: Text("All Categories"),
+        title: Text(
+          "All Categories",
+          style: TextStyle(color: AppConstant.appTextColor),
+        ),
       ),
       body: FutureBuilder(
         future: FirebaseFirestore.instance.collection('categories').get(),

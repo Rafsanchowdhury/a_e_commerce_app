@@ -3,6 +3,7 @@
 
 import 'package:a_e_commerce_app/screens/user-panel/all-categories-screen.dart';
 import 'package:a_e_commerce_app/screens/user-panel/all-flash-sale-products.dart';
+import 'package:a_e_commerce_app/screens/user-panel/all-products-screen.dart';
 import 'package:a_e_commerce_app/widgets/banner-widget.dart';
 import 'package:a_e_commerce_app/widgets/heading-widget.dart';
 import 'package:flutter/material.dart';
@@ -63,9 +64,10 @@ class MainScreen extends StatelessWidget {
               HeadingWidget(
                 headingTitle: "All Products",
                 headingSubTitle: "According to your budget",
-                onTap: () {},
+                onTap: () => Get.to(() => AllProductsScreen()),
                 buttonText: "See More >",
               ),
+
               AllProductsWidget(),
             ],
           ),

@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, sized_box_for_whitespace, avoid_unnecessary_containers, file_names, unnecessary_string_interpolations, unused_import
+// ignore_for_file: prefer_const_constructors, sized_box_for_whitespace, avoid_unnecessary_containers, file_names, unnecessary_string_interpolations, unused_import, prefer_interpolation_to_compose_strings
 
 import 'package:a_e_commerce_app/models/categories-model.dart';
 import 'package:a_e_commerce_app/models/product-model.dart';
@@ -8,6 +8,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:image_card/image_card.dart';
+
+import '../screens/user-panel/product-details-screen.dart';
 
 class AllProductsWidget extends StatelessWidget {
   const AllProductsWidget({super.key});
@@ -47,9 +49,9 @@ class AllProductsWidget extends StatelessWidget {
             physics: BouncingScrollPhysics(),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              mainAxisSpacing: 3,
-              crossAxisSpacing: 3,
-              childAspectRatio: 1.19,
+              mainAxisSpacing: 5,
+              crossAxisSpacing: 5,
+              childAspectRatio: 0.80,
             ),
             itemBuilder: (context, index) {
               final productData = snapshot.data!.docs[index];
@@ -78,16 +80,15 @@ class AllProductsWidget extends StatelessWidget {
               return Row(
                 children: [
                   GestureDetector(
-                    // onTap: () => Get.to(() => AllSingleCategoryProductScreen(
-                    //       categoryId: categoriesModel.categoryId,
-                    //     )),
+                    onTap: () => Get.to(
+                        () => ProductDetailsScreen(productModel: productModel)),
                     child: Padding(
                       padding: EdgeInsets.all(8.0),
                       child: Container(
                         child: FillImageCard(
                           borderRadius: 20.0,
                           width: Get.width / 2.3,
-                          heightImage: Get.height / 10,
+                          heightImage: Get.height / 6,
                           imageProvider: CachedNetworkImageProvider(
                             productModel.productImages[0],
                           ),
@@ -99,6 +100,8 @@ class AllProductsWidget extends StatelessWidget {
                               style: TextStyle(fontSize: 12.0),
                             ),
                           ),
+                          footer: Center(
+                              child: Text("BDT:" + productModel.fullPrice)),
                         ),
                       ),
                     ),
