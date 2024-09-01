@@ -4,6 +4,7 @@
 import 'package:a_e_commerce_app/screens/user-panel/all-categories-screen.dart';
 import 'package:a_e_commerce_app/screens/user-panel/all-flash-sale-products.dart';
 import 'package:a_e_commerce_app/screens/user-panel/all-products-screen.dart';
+import 'package:a_e_commerce_app/screens/user-panel/cart-screen.dart';
 import 'package:a_e_commerce_app/widgets/banner-widget.dart';
 import 'package:a_e_commerce_app/widgets/heading-widget.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +30,15 @@ class MainScreen extends StatelessWidget {
           style: TextStyle(color: AppConstant.appTextColor),
         ),
         centerTitle: true,
+        actions: [
+          GestureDetector(
+            onTap: () => Get.to(() => CartScreen()),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Icon(Icons.shopping_cart),
+            ),
+          )
+        ],
       ),
       drawer: DrawerWidget(),
       body: SingleChildScrollView(

@@ -9,6 +9,7 @@ import 'package:image_card/image_card.dart';
 import '../../models/categories-model.dart';
 import '../../models/product-model.dart';
 import '../../utils/app-constant.dart';
+import 'product-details-screen.dart';
 import 'single-category-products-screen.dart';
 
 class AllFlashSaleProductScreen extends StatefulWidget {
@@ -98,9 +99,8 @@ class _AllFlashSaleProductScreenState extends State<AllFlashSaleProductScreen> {
                 return Row(
                   children: [
                     GestureDetector(
-                      // onTap: () => Get.to(() => AllSingleCategoryProductScreen(
-                      //       categoryId: categoriesModel.categoryId,
-                      //     )),
+                      onTap: () => Get.to(() =>
+                          ProductDetailsScreen(productModel: productModel)),
                       child: Padding(
                         padding: EdgeInsets.all(8.0),
                         child: Container(

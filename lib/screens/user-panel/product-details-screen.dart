@@ -85,8 +85,17 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     padding: const EdgeInsets.all(8.0),
                     child: Container(
                       alignment: Alignment.topLeft,
-                      child: Text(
-                        "BDT: " + widget.productModel.fullPrice,
+                      child: Row(
+                        children: [
+                          widget.productModel.isSale == true &&
+                                  widget.productModel.salePrice != ''
+                              ? Text(
+                                  "BDT: " + widget.productModel.salePrice,
+                                )
+                              : Text(
+                                  "BDT: " + widget.productModel.fullPrice,
+                                ),
+                        ],
                       ),
                     ),
                   ),
