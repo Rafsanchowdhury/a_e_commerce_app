@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables, sort_child_properties_last, no_leading_underscores_for_local_identifiers
 
+import 'package:a_e_commerce_app/screens/user-panel/all-orders-screen.dart';
 import 'package:a_e_commerce_app/utils/app-constant.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -95,6 +96,10 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                     Icon(Icons.shopping_bag, color: AppConstant.appTextColor),
                 trailing:
                     Icon(Icons.arrow_forward, color: AppConstant.appTextColor),
+                onTap: () {
+                  Get.back();
+                  Get.to(() => AllOrdersScreen());
+                },
               ),
             ),
             Padding(

@@ -73,7 +73,7 @@ void placeOrder({
           );
           // upload orders
           await FirebaseFirestore.instance
-              .collection('order')
+              .collection('orders')
               .doc(user.uid)
               .collection('confirmOrders')
               .doc(orderId)

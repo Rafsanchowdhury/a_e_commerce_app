@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 
 class AppConstant {
-  static String appMainName = 'Ecomm';
+  static String appMainName = 'AccessoSync';
   static String appPowerdBy = 'Powerd By Rafsan Chowdhury';
   static const appMainColor = Color(0xFFbf1b08);
   static const appScendaryColor = Color(0xFF981206);
