@@ -9,7 +9,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_swipe_action_cell/core/cell.dart';
 import 'package:get/get.dart';
-import '../../service/place-order-service.dart';
+import '../../service/place-orders-service.dart';
 
 import '../../controllers/cart-price-controller.dart';
 
@@ -254,8 +254,9 @@ class _CartScreenState extends State<CheckOutScreen> {
                       customerAddress: address,
                       customerDeviceToken: customerToken,
                     );
-                  } else
-                    print('Fill the details');
+                  } else {
+                    print("Fill the deails");
+                  }
                 },
                 child: Text(
                   "Place Order",

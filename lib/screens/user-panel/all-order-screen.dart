@@ -2,6 +2,7 @@
 
 import 'package:a_e_commerce_app/models/cart-model.dart';
 import 'package:a_e_commerce_app/models/order-model.dart';
+import 'package:a_e_commerce_app/screens/user-panel/add_reviews_screen.dart';
 import 'package:a_e_commerce_app/utils/app-constant.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -33,7 +34,7 @@ class _AllOrdersScreenState extends State<AllOrdersScreen> {
       ),
       body: StreamBuilder(
         stream: FirebaseFirestore.instance
-            .collection('order')
+            .collection('orders')
             .doc(user!.uid)
             .collection('confirmOrders')
             .snapshots(),
@@ -120,6 +121,16 @@ class _AllOrdersScreenState extends State<AllOrdersScreen> {
                                 )
                         ],
                       ),
+                      trailing: orderModel.status == true
+                          ? ElevatedButton(
+                              onPressed: () => Get.to(
+                                () => AddReviewScreen(
+                                  orderModel: orderModel,
+                                ),
+                              ),
+                              child: Text("Review"),
+                            )
+                          : SizedBox.shrink(),
                     ),
                   );
                 },

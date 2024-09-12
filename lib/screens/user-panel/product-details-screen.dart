@@ -1,5 +1,6 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_declarations, avoid_print
+// ignore_for_file: prefer_const_constructors, prefer_const_declarations, avoid_print, prefer_const_constructors_in_immutables, sized_box_for_whitespace, unused_local_variable
 
+import 'package:a_e_commerce_app/controllers/rating-controller.dart';
 import 'package:a_e_commerce_app/models/cart-model.dart';
 import 'package:a_e_commerce_app/models/product-model.dart';
 import 'package:a_e_commerce_app/utils/app-constant.dart';
@@ -9,9 +10,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../models/review_model.dart';
 import 'cart-screen.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
@@ -28,6 +31,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    CalculateProductRatingController calculateProductRatingController = Get.put(
+        CalculateProductRatingController(widget.productModel.productId));
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(color: AppConstant.appTextColor),
@@ -95,6 +100,34 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           Icon(Icons.favorite_outline)
                         ],
                       ),
+                    ),
+                    // review
+                    Row(
+                      children: [
+                        Container(
+                          alignment: Alignment.topLeft,
+                          child: RatingBar.builder(
+                            glow: false,
+                            ignoreGestures: true,
+                            initialRating: double.parse(
+                                calculateProductRatingController.averageRating
+                                    .toString()),
+                            minRating: 1,
+                            direction: Axis.horizontal,
+                            allowHalfRating: true,
+                            itemCount: 5,
+                            itemSize: 25,
+                            itemPadding: EdgeInsets.symmetric(horizontal: 2.0),
+                            itemBuilder: (context, _) => Icon(
+                              Icons.star,
+                              color: Colors.amber,
+                            ),
+                            onRatingUpdate: (value) {},
+                          ),
+                        ),
+                        Text(calculateProductRatingController.averageRating
+                            .toString()),
+                      ],
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -168,6 +201,69 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   ],
                 ),
               ),
+            ),
+            // reviews
+            FutureBuilder(
+              future: FirebaseFirestore.instance
+                  .collection('products')
+                  .doc(widget.productModel.productId)
+                  .collection('review')
+                  .get(),
+              builder: (BuildContext context,
+                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text("Error"),
+                  );
+                }
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Container(
+                    height: Get.height / 5,
+                    child: Center(
+                      child: CupertinoActivityIndicator(),
+                    ),
+                  );
+                }
+
+                if (snapshot.data!.docs.isEmpty) {
+                  return Center(
+                    child: Text("No reviews found!"),
+                  );
+                }
+
+                if (snapshot.data != null) {
+                  return ListView.builder(
+                    physics: BouncingScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: snapshot.data!.docs.length,
+                    itemBuilder: (context, index) {
+                      var data = snapshot.data!.docs[index];
+                      ReviewModel reviewModel = ReviewModel(
+                        customerName: data['customerName'],
+                        customerPhone: data['customerPhone'],
+                        customerDeviceToken: data['customerDeviceToken'],
+                        customerId: data['customerId'],
+                        feedback: data['feedback'],
+                        rating: data['rating'],
+                        createdAt: data['createdAt'],
+                      );
+                      return Card(
+                        elevation: 5,
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            child: Text(reviewModel.customerName[0]),
+                          ),
+                          title: Text(reviewModel.customerName),
+                          subtitle: Text(reviewModel.feedback),
+                          trailing: Text(reviewModel.rating),
+                        ),
+                      );
+                    },
+                  );
+                }
+
+                return Container();
+              },
             ),
           ],
         ),
