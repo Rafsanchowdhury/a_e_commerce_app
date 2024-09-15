@@ -1,4 +1,4 @@
-// ignore_for_file: file_names, prefer_const_constructors, avoid_unnecessary_containers, prefer_const_literals_to_create_immutables, sized_box_for_whitespace, avoid_print, avoid_web_libraries_in_flutter, unused_import, unused_local_variable, use_build_context_synchronously, curly_braces_in_flow_control_structures
+// ignore_for_file: avoid_print, sized_box_for_whitespace, sort_child_properties_last
 
 import 'package:a_e_commerce_app/controllers/get-customer-device-token-controller.dart';
 import 'package:a_e_commerce_app/models/cart-model.dart';
@@ -9,32 +9,48 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_swipe_action_cell/core/cell.dart';
 import 'package:get/get.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../../service/place-orders-service.dart';
-
 import '../../controllers/cart-price-controller.dart';
 
 class CheckOutScreen extends StatefulWidget {
-  const CheckOutScreen({super.key});
+  const CheckOutScreen({Key? key}) : super(key: key);
 
   @override
-  State<CheckOutScreen> createState() => _CartScreenState();
+  State<CheckOutScreen> createState() => _CheckOutScreen();
 }
 
-class _CartScreenState extends State<CheckOutScreen> {
+class _CheckOutScreen extends State<CheckOutScreen> {
   User? user = FirebaseAuth.instance.currentUser;
   final ProductPriceController productPriceController =
       Get.put(ProductPriceController());
-  TextEditingController nameController = TextEditingController();
-  TextEditingController phoneController = TextEditingController();
-  TextEditingController addressController = TextEditingController();
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController addressController = TextEditingController();
+
+  String? customerToken;
+  String? name;
+  String? phone;
+  String? address;
+
+  final Razorpay _razorpay = Razorpay();
+
+  @override
+  void initState() {
+    super.initState();
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppConstant.appMainColor,
-        title: Text('Checkout Screen'),
+        title: const Text('Checkout Screen'),
       ),
-      body: StreamBuilder(
+      body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('cart')
             .doc(user!.uid)
@@ -42,106 +58,98 @@ class _CartScreenState extends State<CheckOutScreen> {
             .snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) {
-            return Center(
-              child: Text("Error"),
-            );
+            return const Center(child: Text("Error"));
           }
 
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Container(
               height: Get.height / 5.5,
-              child: Center(
-                child: CupertinoActivityIndicator(),
-              ),
+              child: const Center(child: CupertinoActivityIndicator()),
             );
           }
 
-          if (snapshot.data!.docs.isEmpty) {
-            return Center(
-              child: Text("No products found!"),
-            );
+          if (snapshot.data?.docs.isEmpty ?? true) {
+            return const Center(child: Text("No products found!"));
           }
-          if (snapshot.data != null) {
-            return Container(
-              child: ListView.builder(
-                itemCount: snapshot.data!.docs.length,
-                shrinkWrap: true,
-                physics: BouncingScrollPhysics(),
-                itemBuilder: (context, index) {
-                  final productData = snapshot.data!.docs[index];
-                  CartModel cartModel = CartModel(
-                    productId: productData['productId'],
-                    categoryId: productData['categoryId'],
-                    productName: productData['productName'],
-                    categoryName: productData['categoryName'],
-                    salePrice: productData['salePrice'],
-                    fullPrice: productData['fullPrice'],
-                    productImages: productData['productImages'],
-                    deliveryTime: productData['deliveryTime'],
-                    isSale: productData['isSale'],
-                    productDescription: productData['productDescription'],
-                    createdAt: productData['createdAt'],
-                    updatedAt: productData['updatedAt'],
-                    productQuantity: productData['productQuantity'],
-                    productTotalPrice: productData['productTotalPrice'],
-                  );
 
-                  // calculate price
-                  productPriceController.fetchProductPrice();
-                  return SwipeActionCell(
-                    key: ObjectKey(cartModel.productId),
-                    trailingActions: [
-                      SwipeAction(
-                        title: "Delete",
-                        forceAlignmentToBoundary: true,
-                        performsFirstActionWithFullSwipe: true,
-                        onTap: (CompletionHandler handler) {
-                          print('deleted');
-                          FirebaseFirestore.instance
-                              .collection('cart')
-                              .doc(user!.uid)
-                              .collection('cartOrders')
-                              .doc(cartModel.productId)
-                              .delete();
-                        },
-                      ),
-                    ],
-                    child: Card(
-                      elevation: 5,
-                      color: AppConstant.appTextColor,
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: AppConstant.appMainColor,
-                          backgroundImage:
-                              NetworkImage(cartModel.productImages[0]),
-                        ),
-                        title: Text(cartModel.productName),
-                        subtitle: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Text(cartModel.productTotalPrice.toString()),
-                          ],
-                        ),
-                      ),
+          return ListView.builder(
+            itemCount: snapshot.data?.docs.length ?? 0,
+            shrinkWrap: true,
+            physics: const BouncingScrollPhysics(),
+            itemBuilder: (context, index) {
+              final productData = snapshot.data!.docs[index];
+              CartModel cartModel = CartModel(
+                productId: productData['productId'],
+                categoryId: productData['categoryId'],
+                productName: productData['productName'],
+                categoryName: productData['categoryName'],
+                salePrice: productData['salePrice'],
+                fullPrice: productData['fullPrice'],
+                productImages: List<String>.from(productData['productImages']),
+                deliveryTime: productData['deliveryTime'],
+                isSale: productData['isSale'],
+                productDescription: productData['productDescription'],
+                createdAt: productData['createdAt'],
+                updatedAt: productData['updatedAt'],
+                productQuantity: productData['productQuantity'],
+                productTotalPrice: productData['productTotalPrice'],
+              );
+
+              // calculate price
+              productPriceController.fetchProductPrice();
+
+              return SwipeActionCell(
+                key: ObjectKey(cartModel.productId),
+                trailingActions: [
+                  SwipeAction(
+                    title: "Delete",
+                    forceAlignmentToBoundary: true,
+                    performsFirstActionWithFullSwipe: true,
+                    onTap: (CompletionHandler handler) async {
+                      await FirebaseFirestore.instance
+                          .collection('cart')
+                          .doc(user!.uid)
+                          .collection('cartOrders')
+                          .doc(cartModel.productId)
+                          .delete();
+                      handler;
+                    },
+                  ),
+                ],
+                child: Card(
+                  elevation: 5,
+                  color: AppConstant.appTextColor,
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: AppConstant.appMainColor,
+                      backgroundImage: NetworkImage(
+                          cartModel.productImages.isNotEmpty
+                              ? cartModel.productImages[0]
+                              : ''),
                     ),
-                  );
-                },
-              ),
-            );
-          }
-
-          return Container();
+                    title: Text(cartModel.productName),
+                    subtitle: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(cartModel.productTotalPrice.toString()),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          );
         },
       ),
       bottomNavigationBar: Container(
-        margin: EdgeInsets.only(bottom: 5.0),
+        margin: const EdgeInsets.only(bottom: 5.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Obx(
               () => Text(
                 " Total: ${productPriceController.totalPrice.value.toStringAsFixed(1)} : BDT",
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
             Padding(
@@ -155,13 +163,11 @@ class _CartScreenState extends State<CheckOutScreen> {
                     borderRadius: BorderRadius.circular(20.0),
                   ),
                   child: TextButton(
-                    child: Text(
+                    child: const Text(
                       "Confirm Order",
                       style: TextStyle(color: AppConstant.appTextColor),
                     ),
-                    onPressed: () {
-                      showCustomBottomSheet();
-                    },
+                    onPressed: showCustomBottomSheet,
                   ),
                 ),
               ),
@@ -176,7 +182,7 @@ class _CartScreenState extends State<CheckOutScreen> {
     Get.bottomSheet(
       Container(
         height: Get.height * 0.8,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(
             top: Radius.circular(16.0),
@@ -193,7 +199,7 @@ class _CartScreenState extends State<CheckOutScreen> {
                   child: TextFormField(
                     controller: nameController,
                     textInputAction: TextInputAction.next,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Name',
                       contentPadding: EdgeInsets.symmetric(horizontal: 10.0),
                       hintStyle: TextStyle(fontSize: 12),
@@ -210,7 +216,7 @@ class _CartScreenState extends State<CheckOutScreen> {
                     controller: phoneController,
                     textInputAction: TextInputAction.next,
                     keyboardType: TextInputType.phone,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Phone',
                       contentPadding: EdgeInsets.symmetric(horizontal: 10.0),
                       hintStyle: TextStyle(fontSize: 12),
@@ -225,7 +231,7 @@ class _CartScreenState extends State<CheckOutScreen> {
                   height: 55.0,
                   child: TextFormField(
                     controller: addressController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Address',
                       contentPadding: EdgeInsets.symmetric(horizontal: 10.0),
                       hintStyle: TextStyle(fontSize: 12),
@@ -235,30 +241,39 @@ class _CartScreenState extends State<CheckOutScreen> {
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: AppConstant.appMainColor,
-                    padding: EdgeInsets.fromLTRB(10, 10, 10, 10)),
+                  backgroundColor: AppConstant.appMainColor,
+                  padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+                ),
                 onPressed: () async {
-                  if (nameController.text != '' &&
-                      phoneController.text != '' &&
-                      addressController.text != '') {
-                    String name = nameController.text.trim();
-                    String phone = phoneController.text.trim();
-                    String address = addressController.text.trim();
+                  if (nameController.text.isNotEmpty &&
+                      phoneController.text.isNotEmpty &&
+                      addressController.text.isNotEmpty) {
+                    setState(() {
+                      name = nameController.text.trim();
+                      phone = phoneController.text.trim();
+                      address = addressController.text.trim();
+                    });
 
-                    String customerToken = await getCustomerDeviceToken();
+                    customerToken = await getCustomerDeviceToken();
 
-                    placeOrder(
-                      context: context,
-                      customerName: name,
-                      customerPhone: phone,
-                      customerAddress: address,
-                      customerDeviceToken: customerToken,
-                    );
+                    var options = {
+                      'key': 'rzp_test_7DQ1Jh1sVp38cO',
+                      'amount': 1000,
+                      'currency': 'USD',
+                      'name': 'Rafsan Chowdhury.',
+                      'description': 'Fine T-Shirt',
+                      'prefill': {
+                        'contact': '8888888888',
+                        'email': 'test@razorpay.com'
+                      }
+                    };
+
+                    _razorpay.open(options);
                   } else {
-                    print("Fill the deails");
+                    print("Fill the details");
                   }
                 },
-                child: Text(
+                child: const Text(
                   "Place Order",
                   style: TextStyle(color: Colors.white),
                 ),
@@ -272,5 +287,40 @@ class _CartScreenState extends State<CheckOutScreen> {
       enableDrag: true,
       elevation: 6,
     );
+  }
+
+  void _handlePaymentSuccess(PaymentSuccessResponse response) {
+    // Check if the variables are not null before using them
+    if (name != null &&
+        phone != null &&
+        address != null &&
+        customerToken != null) {
+      placeOrder(
+        context: context,
+        customerName: name!,
+        customerPhone: phone!,
+        customerAddress: address!,
+        customerDeviceToken: customerToken!,
+      );
+    } else {
+      print("Error: One or more required fields are null.");
+    }
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    // Do something when payment fails
+  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) {
+    // Do something when an external wallet was selected
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    phoneController.dispose();
+    addressController.dispose();
+    _razorpay.clear();
+    super.dispose();
   }
 }
